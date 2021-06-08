@@ -6,18 +6,45 @@
  */
 
 #include<iostream>
+#include<stdlib.h>
+#include "mokshapatam.hpp"
 using namespace std;
-enum PlayerCount {
-    _ZERO=0,
-    _TWO = 2,
-    _THREE = 3,
-    _FOUR = 4
-};
-enum Sizes {
-    _NULL=0,
-    _8X8=64,
-    _10X10=100,
-    _12X12=144
+
+
+class Player {
+    string name;
+    int currentLocation,maxLocation;
+    bool endReached;
+    
+    public:
+        Player(string name) {
+            this->name = name;
+            currentLocation = 0;
+            maxLocation = 100;
+            endReached = false;
+        }
+        Player() {
+            currentLocation = 0;
+            maxLocation = 100;
+            endReached = false;
+        }
+        string getName() {
+            return name;
+        }
+        void moveAheadBy(int steps) {
+            if(currentLocation != maxLocation)
+                currentLocation += steps;
+                if(currentLocation == maxLocation) {
+                    endReached = true;
+                } 
+        }
+        void moveBackBy(int steps) {
+            if(currentLocation!=0)
+                currentLocation -= steps;
+        }
+        int getCurrentLocation() {
+            return currentLocation;
+        }
 };
 class Box {
     private:
@@ -26,23 +53,31 @@ class Box {
         bool ladderStart,snakeStart;
         int ladderSize,snakeSize;
     public:
-    Box() {
-        playerCount = _ZERO;
-        playerNames = new string[playerCount];
-    }
-    Box() {
-        
-    }
+        Box() {
+            playerCount = _ZERO;
+            playerNames = new string[playerCount];
+        }
+        void init() {
+
+        }
 };
+
+class Dice {
+    public:
+        static int roll() {
+            return rand()%6+1;
+        }
+};
+
 class Board {
     private:
+        Player *playerList;
         Sizes boardSize;
         Box *boardBoxes;
     public:
         Board() {
             boardSize = _NULL;
             boardBoxes = new Box[boardSize];
-            boardBoxes[0];
         }
         Board(Sizes size) {
             boardSize = size;
@@ -55,11 +90,39 @@ class Board {
             }
             return i;
         }
+        void init() {
 
+        }
+        void allotPlayers(Player players[]) {
+            playerList = players;
+            
+        }
+        Player* getPlayer(int playerIndex) {
+            return &playerList[playerIndex];
+        }
+        void reset() {
+            playerList = nullptr;
+            boardBoxes = nullptr;
+        }
 };
 
-
 int main() {
-    Board mokshaPatam(_8X8);
-    cout<<mokshaPatam.getSize();
+    Board mokshaPatam(_10X10);
+    // - board of 100 blocks has been created in memeory
+    // - without any ladders and snakes over it
+    Dice dice1;
+    Player playerList[2] = {{"Yashesvi"},{"Arshi"}};
+    // - two players have been made
+    mokshaPatam.allotPlayers(playerList);
+    cout<<mokshaPatam.getPlayer(1)->getName()<<endl;
+
+    mokshaPatam.getPlayer(0)->moveAheadBy(10);
+    cout<<mokshaPatam.getPlayer(0)->getCurrentLocation()<<endl;
+    mokshaPatam.getPlayer(0)->moveAheadBy(90);
+    cout<<mokshaPatam.getPlayer(0)->getCurrentLocation()<<endl;
+    mokshaPatam.getPlayer(0)->moveAheadBy(1);
+    cout<<mokshaPatam.getPlayer(0)->getCurrentLocation()<<endl;
+    mokshaPatam.getPlayer(0)->moveAheadBy(12);
+    cout<<mokshaPatam.getPlayer(0)->getCurrentLocation()<<endl;
+    return 0;
 }

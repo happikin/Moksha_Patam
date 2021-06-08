@@ -1,3 +1,8 @@
 1. the grid size will be 10 X 10 by standard. although if the project
      is successfull then we may introduce options for multiple sized board game.
 2. This will be a 2 player game by standard and will include options for more players in future developments.
+
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+ a) The player object must have the moveBy() method because if the Board object has the move method
+     then it would not make any sense. As it would suggest we are moving the board.
