@@ -4,7 +4,7 @@
 #include<vector>
 #include<fstream>
 #include<sstream>
-#include<Thread>
+#include<thread>
 enum PlayerCount {
 	_ZERO = 0,
 	_TWO = 2,
@@ -61,21 +61,56 @@ public:
 		maxLocation = max;
 	}
 };
-
+class Ladder {
+public:
+	int start;
+	int end;
+	Ladder(int s, int e)
+	{
+		start = s; end = e;
+	}
+	Ladder() {}
+};
+class Snake {
+public:
+	int start;
+	int end;
+	Snake(int s, int e) {
+		start = s; end = e;
+	}
+	Snake() {}
+};
 class Box {
 private:
 	PlayerCount playerCount;
 	std::string *playerNames;
 	bool ladderStart, snakeStart;
-	int ladderSize, snakeSize;
+	int ladderEnd, snakeEnd;
 public:
 	Box() {
+		ladderEnd = 0;
+		snakeEnd = 0;
+		ladderStart = false;
+		snakeStart = false;
 		playerCount = _ZERO;
 		playerNames = new std::string[playerCount];
 	}
-	void init() {
-
+	void allotLadder(int end) {
+		ladderStart = true;
+		ladderEnd = end;
 	}
+	void allotSnake(int end) {
+		snakeStart = true;
+		snakeEnd = end;
+	}
+	int getLadderEnd() {
+		return ladderEnd;
+	}
+	int getSnakeEnd() {
+		return snakeEnd;
+	}
+	bool hasSnake() { return snakeStart; }
+	bool hasLadder() { return ladderStart; }
 };
 
 class Board {
@@ -113,25 +148,30 @@ public:
 		playerList = nullptr;
 		boardBoxes = nullptr;
 	}
-	/*void setup(vector<Ladder> ladder_vect,vector<Snake> snake_vect) {
-
-	}*/
-};
-class Ladder {
-public:
-	int start;
-	int end;
-	Ladder(int s, int e)
-	{
-		start = s; end = e;
+	void attachLadders(std::vector<Ladder> ladder_vect) {
+		std::cout << "INSIDE ATTACH LADDER METHOD" << std::endl;
+		int lCount = ladder_vect.size();
+		for (int i = 0; i < lCount; i++) {
+			boardBoxes[ladder_vect[i].start - 1].allotLadder(ladder_vect[i].end - 1);
+		}
+		std::cout << "All ladders attached" << std::endl;
 	}
-	Ladder() {}
+	void attachSnakes(std::vector<Snake> snake_vect) {
+		int sCount = snake_vect.size();
+		for (int i = 0; i < sCount; i++) {
+			boardBoxes[snake_vect[i].start - 1].allotSnake(snake_vect[i].end - 1);
+		}
+		std::cout << "All snakes attached" << std::endl;
+	}
+	void setup(std::vector<Ladder> ladder_vect, std::vector<Snake> snake_vect) {
+		attachLadders(ladder_vect);
+		attachSnakes(snake_vect);
+	}
+	Box* getBoard() {
+		return boardBoxes;
+	}
 };
-class Snake {
-public:
-	int start;
-	int end;
-};
+
 class GameHandler {
 private:
 	std::vector<Ladder> ladder_vect;
@@ -152,7 +192,7 @@ private:
 		int i = 0;
 		while (i < playerCount) {
 			std::cout << "Enter your game name: ";
-			std::cin>>playerName;
+			std::cin >> playerName;
 			playerList[i++] = { playerName };
 		}
 		return "MESSAGE: Players registered \n";
@@ -197,8 +237,8 @@ private:
 	// will contain methods to handle the basic setups for a game
 public:
 	GameHandler() {
-			chooseBoardSize();
-			this->inGameMessage = registerPlayers();
+		chooseBoardSize();
+		this->inGameMessage = registerPlayers();
 	}
 	Player* getGamePlayers() {
 		return playerList;
@@ -213,8 +253,12 @@ public:
 		return inGameMessage;
 	}
 	void prepBoardData() {
-		std::thread t_ladder;
-		std::thread t_snake;
+		// std::thread t_ladder(prepLadderVect);
+		// std::thread t_snake(prepSnakeVect);
+		// t_ladder.join();
+		// t_snake.join();
+		this->prepLadderVect();
+		this->prepSnakeVect();
 	}
 	void prepLadderVect() {
 		std::stringstream ss;
@@ -235,28 +279,30 @@ public:
 				cout << ladder_vect[c].end << endl;*/
 				c++;
 			}
+
 			std::cout << "Loading Ladder data complete!" << std::endl;
 		}
 		else
 		{
 			std::cout << "Not opened";
 		}
+		_10X10Ladder.close();
 	}
 	void prepSnakeVect() {
 		std::stringstream ss;
-		std::ifstream _10X10Ladder;
-		_10X10Ladder.open("D:\\Practice C++ Coding\\CPP\\Moksha_Patam\\BoardSetupData\\_10X10\\_10X10SNAKES.txt", std::ios::in);
-		if (!_10X10Ladder) std::cerr << "COULD NOT OPEN FILE" << std::endl;
-		if (_10X10Ladder.is_open()) {
+		std::ifstream _10X10Snake;
+		_10X10Snake.open("D:\\Practice C++ Coding\\CPP\\Moksha_Patam\\BoardSetupData\\_10X10\\_10X10SNAKES.txt", std::ios::in);
+		if (!_10X10Snake) std::cerr << "COULD NOT OPEN FILE" << std::endl;
+		if (_10X10Snake.is_open()) {
 			std::cout << "Snake File is open" << std::endl;
 			std::string dat;
 			int *num;
 			int c = 0;
-			while (getline(_10X10Ladder, dat)) {
+			while (getline(_10X10Snake, dat)) {
 				//std::cout << " - - - - - " << c + 1 << "Ladder" << std::endl;
 				num = splitInTwoNums(dat, ',');
-				Ladder l1(num[0], num[1]);
-				ladder_vect.push_back(l1);
+				Snake s1(num[0], num[1]);
+				snake_vect.push_back(s1);
 				/*cout << ladder_vect[c].start << endl;
 				cout << ladder_vect[c].end << endl;*/
 				c++;
@@ -267,6 +313,7 @@ public:
 		{
 			std::cout << "Not opened";
 		}
+		_10X10Snake.close();
 	}
 	std::vector<Ladder> getLadders() {
 		return ladder_vect;

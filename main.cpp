@@ -10,14 +10,20 @@
 #include "mokshapatam.h"
 using namespace std;
 
-
-
 int main() {
 	GameHandler handler;
 	Board mokshaPatam(handler.getBoardSize());  // - board created without any ladders and snakes over it
 	mokshaPatam.allotPlayers(handler.getGamePlayers(), handler.getPlayerCount());
 	cout << handler.getInGameMessage();
-	handler.prepLadderVect();
-	handler.prepSnakeVect();
+	handler.prepBoardData();
+	mokshaPatam.setup(handler.getLadders(), handler.getSnakes());
+	Box *board = mokshaPatam.getBoard();
+	
+	cout << "Ladder End: " << board[7].getLadderEnd() << endl;
+	cout << "Snake End: " << board[97].getSnakeEnd() << endl;
+	if (board[97].hasSnake()) {
+		cout << "HAS SNAKE" << endl;
+	}
+
 	return 0;
 }
