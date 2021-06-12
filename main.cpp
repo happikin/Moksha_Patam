@@ -6,7 +6,6 @@
  */
 
 #include<iostream>
-#include "ll.h"
 #include "mokshapatam.h"
 using namespace std;
 
@@ -23,6 +22,8 @@ int main() {
 	- we must have a dice to roll
 	- the players must be at location 0(0 means 1st box in the boardBox array)
 	*/
-	
+	bool state = handler.runGame(mokshaPatam);
+	if (state)
+		cout << "Thank you for playing the game" << endl;
 	return 0;
 }

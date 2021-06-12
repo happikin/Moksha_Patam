@@ -5,13 +5,14 @@
 #include<fstream>
 #include<sstream>
 #include<thread>
-enum PlayerCount {
+#include<time.h>
+enum class PlayerCount {
 	_ZERO = 0,
 	_TWO = 2,
 	_THREE = 3,
 	_FOUR = 4
 };
-enum Sizes {
+enum class Sizes {
 	_NULL = 0,
 	_8X8 = 64,
 	_10X10 = 100,
@@ -20,6 +21,7 @@ enum Sizes {
 class Dice {
 public:
 	static int roll() {
+		srand(time(0));
 		return rand() % 6 + 1;
 	}
 };
@@ -44,10 +46,12 @@ public:
 		return name;
 	}
 	void moveAheadBy(int steps) {
-		if (currentLocation != maxLocation)
-			currentLocation += steps;
-		if (currentLocation == maxLocation) {
-			endReached = true;
+		if (steps >=0 && steps <= maxLocation) {
+			if (currentLocation != maxLocation)
+				currentLocation += steps;
+			if (currentLocation == maxLocation) {
+				endReached = true;
+			}
 		}
 	}
 	void moveBackBy(int steps) {
@@ -92,8 +96,8 @@ public:
 		snakeEnd = 0;
 		ladderStart = false;
 		snakeStart = false;
-		playerCount = _ZERO;
-		playerNames = new std::string[playerCount];
+		playerCount = PlayerCount::_ZERO;
+		playerNames = new std::string[int(playerCount)];
 	}
 	void allotLadder(int end) {
 		ladderStart = true;
@@ -121,16 +125,20 @@ private:
 	Box *boardBoxes;
 public:
 	Board() {
-		boardSize = _NULL;
-		boardBoxes = new Box[boardSize];
+		boardSize = Sizes::_NULL;
+		boardBoxes = new Box[int(boardSize)];
+		playerCount = 0;
+		playerList = nullptr;
 	}
 	Board(Sizes size) {
 		boardSize = size;
-		boardBoxes = new Box[boardSize];
+		boardBoxes = new Box[int(boardSize)];
+		playerCount = 0;
+		playerList = nullptr;
 	}
 	int getSize() {
 		int i = 0;
-		while (i < boardSize) {
+		while (i < int(boardSize)) {
 			i++;
 		}
 		return i;
@@ -139,7 +147,7 @@ public:
 		playerList = players;
 		playerCount = count;
 		for (int i = 0; i < this->playerCount; i++)
-			playerList[i].setMaxLocation(boardSize);
+			playerList[i].setMaxLocation(int(boardSize));
 	}
 	Player* getPlayer(int playerIndex) {
 		return &playerList[playerIndex];
@@ -167,7 +175,6 @@ public:
 		if (ladder_vect.size() != 0 && snake_vect.size() != 0) {
 			attachLadders(ladder_vect);
 			attachSnakes(snake_vect);
-			std::cout<<"- - GAME BOARD SETUP COMPLETE - - - - - - 100%"<<std::endl;
 		}
 		else
 		{
@@ -176,6 +183,9 @@ public:
 	}
 	Box* getBoard() {
 		return boardBoxes;
+	}
+	int getPlayerCount() {
+		return playerCount;
 	}
 };
 
@@ -189,6 +199,9 @@ private:
 	std::string playerName;
 	Sizes boardSize;
 	std::string boardDataFolderName;
+	std::string choice = "start";
+	std::string Choices[3] = {"start","reset","exit"};
+	
 	std::string registerPlayers() {
 		std::cout << "How many players wish to play Moksha Patam? ";
 		std::cin >> playerCount;
@@ -229,15 +242,15 @@ private:
 		std::cin >> option;
 		switch (option) {
 		case 1:
-			boardSize = _8X8;
+			boardSize = Sizes::_8X8;
 			boardDataFolderName = "_8X8";
 			break;
 		case 2:
-			boardSize = _10X10;
+			boardSize = Sizes::_10X10;
 			boardDataFolderName = "_10X10";
 			break;
 		case 3:
-			boardSize = _12X12;
+			boardSize = Sizes::_12X12;
 			boardDataFolderName = "_12X12";
 			break;
 		default:
@@ -334,7 +347,70 @@ public:
 	std::vector<Snake> getSnakes() {
 		return snake_vect;
 	}
+	bool runGame(Board gameBoard);
+	void displayPlayers(Board gameBoard) {
+		for (int i = 0; i < gameBoard.getPlayerCount(); i++) {
+			std::cout << "Player " << i+1 << ": " << gameBoard.getPlayer(i)->getName() << std::endl;
+		}
+	}
+	void toss() {
+		std::cout<<"choose [even / odd]"<<std::endl;
+		std::string ch; 
+		std::cin >> ch;
+		Dice dice;
+		int rollResult = dice.roll() % 6 + 1;
+		if (rollResult == 2 || rollResult == 4 || rollResult == 6) {
+			return;
+		}
+	}
 };
+
+bool GameHandler::runGame(Board gameBoard) {
+	Dice dice;
+	system("CLS");
+	std::cout << " - - Welcome to Moksha Patam an ancient Indian board game which gained popularity by the name Snakes & Ladders! - - " << std::endl;
+	displayPlayers(gameBoard);
+	//this entire function will oscillate sequentially between 'turns'
+	std::string choice = "start";
+	while (choice != "exit")
+	{
+		int i = 0;
+		for (; i < gameBoard.getPlayerCount() ; i++) {
+			std::cout << "Turn of " << gameBoard.getPlayer(i)->getName() << std::endl;
+			std::string ch;
+			std::cout << "type \"roll\" to roll the dice : else next players turn will come up! " << std::endl;
+			std::cin >> ch;
+			if (ch == "roll") {
+				int rollResult = dice.roll();
+				std::cout << "Die roll result: " << rollResult << std::endl;
+				gameBoard.getPlayer(i)->moveAheadBy(rollResult);
+				std::cout << gameBoard.getPlayer(i)->getName() << " Moved ahead by " << rollResult << " steps" << std::endl;
+				if (gameBoard.getBoard()[gameBoard.getPlayer(i)->getCurrentLocation()].hasLadder()) {
+					std::cout << "Hurray!! Your current location has a ladder! lets Climb ;-)) " << std::endl;
+					gameBoard.getPlayer(i)->moveAheadBy(gameBoard.getBoard()[gameBoard.getPlayer(i)->getCurrentLocation()].getLadderEnd());
+					std::cout << "New location of " << gameBoard.getPlayer(i)->getName() << "is : " << gameBoard.getPlayer(i)->getCurrentLocation() << std::endl;
+				}
+				else if (gameBoard.getBoard()[gameBoard.getPlayer(i)->getCurrentLocation()].hasSnake()) {
+					std::cout << "Oopsiee!! Your current location has a snake! Here we go down :-(( " << std::endl;
+					gameBoard.getPlayer(i)->moveBackBy(gameBoard.getBoard()[gameBoard.getPlayer(i)->getCurrentLocation()].getSnakeEnd());
+					std::cout << "New location of " << gameBoard.getPlayer(i)->getName() << "is : " << gameBoard.getPlayer(i)->getCurrentLocation() << std::endl;
+				}
+			}
+			else
+			{
+				std::cout << "Turn of next player will come up now!" << std::endl;
+			}
+			std::cout << "Please type \"exit\" if you wish to exit the game" << std::endl;
+			std::cin >> choice;
+			if (choice == "exit") {
+				return true;
+			}
+		}
+	}
+
+	return true;
+}
+
 
 class GameData : public GameHandler {
 	std::vector<Ladder>::iterator ladderIt;
