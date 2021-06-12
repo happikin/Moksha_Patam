@@ -18,12 +18,11 @@ int main() {
 	handler.prepBoardData();
 	mokshaPatam.setup(handler.getLadders(), handler.getSnakes());
 	Box *board = mokshaPatam.getBoard();
+	// now we have to implement game play logic
+	/*
+	- we must have a dice to roll
+	- the players must be at location 0(0 means 1st box in the boardBox array)
+	*/
 	
-	cout << "Ladder End: " << board[7].getLadderEnd() << endl;
-	cout << "Snake End: " << board[97].getSnakeEnd() << endl;
-	if (board[97].hasSnake()) {
-		cout << "HAS SNAKE" << endl;
-	}
-
 	return 0;
 }

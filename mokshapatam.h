@@ -164,8 +164,15 @@ public:
 		std::cout << "All snakes attached" << std::endl;
 	}
 	void setup(std::vector<Ladder> ladder_vect, std::vector<Snake> snake_vect) {
-		attachLadders(ladder_vect);
-		attachSnakes(snake_vect);
+		if (ladder_vect.size() != 0 && snake_vect.size() != 0) {
+			attachLadders(ladder_vect);
+			attachSnakes(snake_vect);
+			std::cout<<"- - GAME BOARD SETUP COMPLETE - - - - - - 100%"<<std::endl;
+		}
+		else
+		{
+			std::cout << "Ladders & Snakes failed to prep. Please Try again." << std::endl;
+		}
 	}
 	Box* getBoard() {
 		return boardBoxes;
@@ -181,6 +188,7 @@ private:
 	int playerCount;
 	std::string playerName;
 	Sizes boardSize;
+	std::string boardDataFolderName;
 	std::string registerPlayers() {
 		std::cout << "How many players wish to play Moksha Patam? ";
 		std::cin >> playerCount;
@@ -222,12 +230,15 @@ private:
 		switch (option) {
 		case 1:
 			boardSize = _8X8;
+			boardDataFolderName = "_8X8";
 			break;
 		case 2:
 			boardSize = _10X10;
+			boardDataFolderName = "_10X10";
 			break;
 		case 3:
 			boardSize = _12X12;
+			boardDataFolderName = "_12X12";
 			break;
 		default:
 			exit(1);
@@ -253,58 +264,60 @@ public:
 		return inGameMessage;
 	}
 	void prepBoardData() {
-		// std::thread t_ladder(prepLadderVect);
-		// std::thread t_snake(prepSnakeVect);
-		// t_ladder.join();
-		// t_snake.join();
-		this->prepLadderVect();
-		this->prepSnakeVect();
+			this->prepLadderVect();
+			this->prepSnakeVect();
 	}
 	void prepLadderVect() {
+		
 		std::stringstream ss;
-		std::ifstream _10X10Ladder;
-		_10X10Ladder.open("D:\\Practice C++ Coding\\CPP\\Moksha_Patam\\BoardSetupData\\_10X10\\_10X10LADDERS.txt", std::ios::in);
-		if (!_10X10Ladder) std::cerr << "COULD NOT OPEN FILE" << std::endl;
-		if (_10X10Ladder.is_open()) {
+		std::ifstream ladderFile;
+		std::string fileLoc = "D:\\Practice C++ Coding\\CPP\\Moksha_Patam\\BoardSetupData\\";
+		fileLoc.append(boardDataFolderName);
+		fileLoc.append("\\LADDERS.txt");
+		ladderFile.open(fileLoc, std::ios::in);
+		if (!ladderFile) {
+			std::cerr << "COULD NOT OPEN FILE" << std::endl;
+			exit(1);
+		}
+		if (ladderFile.is_open()) {
 			std::cout << "Ladder File is open" << std::endl;
 			std::string dat;
 			int *num;
 			int c = 0;
-			while (getline(_10X10Ladder, dat)) {
-				//std::cout << " - - - - - " << c + 1 << "Ladder" << std::endl;
+			while (getline(ladderFile, dat)) {
 				num = splitInTwoNums(dat, ',');
 				Ladder l1(num[0], num[1]);
 				ladder_vect.push_back(l1);
-				/*cout << ladder_vect[c].start << endl;
-				cout << ladder_vect[c].end << endl;*/
 				c++;
 			}
-
 			std::cout << "Loading Ladder data complete!" << std::endl;
 		}
 		else
 		{
 			std::cout << "Not opened";
 		}
-		_10X10Ladder.close();
+		ladderFile.close();
 	}
 	void prepSnakeVect() {
 		std::stringstream ss;
-		std::ifstream _10X10Snake;
-		_10X10Snake.open("D:\\Practice C++ Coding\\CPP\\Moksha_Patam\\BoardSetupData\\_10X10\\_10X10SNAKES.txt", std::ios::in);
-		if (!_10X10Snake) std::cerr << "COULD NOT OPEN FILE" << std::endl;
-		if (_10X10Snake.is_open()) {
+		std::ifstream snakeFile;
+		std::string fileLoc = "D:\\Practice C++ Coding\\CPP\\Moksha_Patam\\BoardSetupData\\";
+		fileLoc.append(boardDataFolderName);
+		fileLoc.append("\\SNAKES.txt");
+		snakeFile.open(fileLoc, std::ios::in);
+		if (!snakeFile) {
+			std::cerr << "COULD NOT OPEN FILE" << std::endl;
+			exit(1);
+		}
+		if (snakeFile.is_open()) {
 			std::cout << "Snake File is open" << std::endl;
 			std::string dat;
 			int *num;
 			int c = 0;
-			while (getline(_10X10Snake, dat)) {
-				//std::cout << " - - - - - " << c + 1 << "Ladder" << std::endl;
+			while (getline(snakeFile, dat)) {
 				num = splitInTwoNums(dat, ',');
 				Snake s1(num[0], num[1]);
 				snake_vect.push_back(s1);
-				/*cout << ladder_vect[c].start << endl;
-				cout << ladder_vect[c].end << endl;*/
 				c++;
 			}
 			std::cout << "Loading Snake data complete!" << std::endl;
@@ -313,7 +326,7 @@ public:
 		{
 			std::cout << "Not opened";
 		}
-		_10X10Snake.close();
+		snakeFile.close();
 	}
 	std::vector<Ladder> getLadders() {
 		return ladder_vect;
