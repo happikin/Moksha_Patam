@@ -64,6 +64,11 @@ public:
 	void setMaxLocation(int max) {
 		maxLocation = max;
 	}
+	bool hasWon() {
+		if (this->currentLocation == this->maxLocation)
+			return true;
+		return false;
+	}
 };
 class Ladder {
 public:
@@ -353,16 +358,6 @@ public:
 			std::cout << "Player " << i+1 << ": " << gameBoard.getPlayer(i)->getName() << std::endl;
 		}
 	}
-	void toss() {
-		std::cout<<"choose [even / odd]"<<std::endl;
-		std::string ch; 
-		std::cin >> ch;
-		Dice dice;
-		int rollResult = dice.roll() % 6 + 1;
-		if (rollResult == 2 || rollResult == 4 || rollResult == 6) {
-			return;
-		}
-	}
 };
 
 bool GameHandler::runGame(Board gameBoard) {
@@ -394,6 +389,10 @@ bool GameHandler::runGame(Board gameBoard) {
 					std::cout << "Oopsiee!! Your current location has a snake! Here we go down :-(( " << std::endl;
 					gameBoard.getPlayer(i)->moveBackBy(gameBoard.getBoard()[gameBoard.getPlayer(i)->getCurrentLocation()].getSnakeEnd());
 					std::cout << "New location of " << gameBoard.getPlayer(i)->getName() << "is : " << gameBoard.getPlayer(i)->getCurrentLocation() << std::endl;
+				}
+				if (gameBoard.getPlayer(i)->hasWon()) {
+					std::cout << "You have won " << gameBoard.getPlayer(i)->getName() << std::endl;
+					return false;
 				}
 			}
 			else

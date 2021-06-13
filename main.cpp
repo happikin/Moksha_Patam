@@ -22,8 +22,17 @@ int main() {
 	- we must have a dice to roll
 	- the players must be at location 0(0 means 1st box in the boardBox array)
 	*/
-	bool state = handler.runGame(mokshaPatam);
-	if (state)
-		cout << "Thank you for playing the game" << endl;
+	string choice = "restart";
+	while (choice == "restart") {
+		choice = "exit";
+		bool state = handler.runGame(mokshaPatam);
+		if (state)
+			cout << "Thank you for playing the game" << endl;
+		else
+		{
+			cout << "Type \"restart\" to play the game again: else type \"exit\" to end the game" << endl;
+			cin >> choice;
+		}
+	}
 	return 0;
 }
